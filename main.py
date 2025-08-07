@@ -39,4 +39,4 @@ def session_expire(authorization: Annotated[str | None, Header()] = None):
     try:
         ses_manager.expire_session(authorization)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail="Session token is invalid.")
+        raise HTTPException(status_code=400, detail=str(e))
