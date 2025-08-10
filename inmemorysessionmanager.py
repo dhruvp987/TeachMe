@@ -21,6 +21,4 @@ class InMemorySessionManager:
         return None
 
     def expire_session(self, session_tok):
-        if session_tok not in self._sessions:
-            raise ValueError("Session token does not represent a valid session.")
         del self._sessions[session_tok]
