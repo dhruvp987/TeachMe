@@ -26,6 +26,8 @@ query_user_notes_col_decl = {
 }
 tools = types.Tool(function_declarations=[query_user_notes_col_decl])
 
+thinking_config = types.ThinkingConfig(include_thoughts=True)
+
 # Make sure GEMINI_API_KEY env var is set
 client = genai.Client()
 
@@ -37,7 +39,9 @@ class GeminiStudentAgent:
         self._model = model
 
         self._config = types.GenerateContentConfig(
-            system_instruction=system_inst, tools=[tools]
+            system_instruction=system_inst,
+            tools=[tools],
+            thinking_config=thinking_config,
         )
 
         self._contents = []
@@ -54,27 +58,33 @@ class GeminiStudentAgent:
             config=self._config,
         )
 
-        tool_call = response.candidates[0].content.parts[0].function_call
-        if tool_call and tool_call.name == QUERY_USER_NOTES_COL_NAME:
-            notes = query_notes_func(**tool_call.args)
+        if (
+            response.function_calls
+            and response.function_calls[0].name == QUERY_USER_NOTES_COL_NAME
+        ):
+            func_call = response.function_calls[0]
+            notes = query_notes_func(**func_call.args)
 
             function_response_part = types.Part.from_function_response(
-                name=tool_call.name, response={"result": notes}
+                name=func_call.name, response={"result": notes}
             )
             self._contents.append(response.candidates[0].content)
             self._contents.append(
                 types.Content(role="user", parts=[function_response_part])
             )
 
-            output.append(
-                {
-                    "role": "assistant",
-                    "toolCall": {
-                        "name": QUERY_USER_NOTES_COL_NAME,
-                        "args": tool_call.args,
-                    },
-                }
+            assistant_out = {
+                "role": "assistant",
+                "toolCall": {
+                    "name": QUERY_USER_NOTES_COL_NAME,
+                    "args": func_call.args,
+                },
+            }
+            self._add_possible_thought(
+                response.candidates[0].content.parts, assistant_out
             )
+
+            output.append(assistant_out)
             output.append(
                 {
                     "role": "user",
@@ -91,5 +101,17 @@ class GeminiStudentAgent:
                 config=self._config,
             )
 
-        output.append({"role": "assistant", "content": response.text})
+        assistant_out = {
+            "role": "assistant",
+            "content": response.text,
+        }
+        self._add_possible_thought(response.candidates[0].content.parts, assistant_out)
+        output.append(assistant_out)
+
         return output
+
+    def _add_possible_thought(self, parts, out):
+        for part in parts:
+            if part.thought:
+                return part.text
+        return None
