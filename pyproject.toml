@@ -8,4 +8,5 @@ dependencies = [
     "chromadb>=1.0.15",
     "fastapi[standard]>=0.116.1",
     "google-genai>=1.28.0",
+    "openai>=1.99.9",
 ]
