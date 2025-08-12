@@ -26,13 +26,14 @@ query_user_notes_col_decl = {
 }
 tools = types.Tool(function_declarations=[query_user_notes_col_decl])
 
+# Make sure GEMINI_API_KEY env var is set
+client = genai.Client()
+
 
 class GeminiStudentAgent:
     GEMINI_2_5_FLASH = "gemini-2.5-flash"
 
     def __init__(self, system_inst, model=GEMINI_2_5_FLASH):
-        # Make sure GEMINI_API_KEY is set
-        self._client = genai.Client()
         self._model = model
 
         self._config = types.GenerateContentConfig(
@@ -47,7 +48,7 @@ class GeminiStudentAgent:
         self._contents.append(
             types.Content(role="user", parts=[types.Part(text=prompt)])
         )
-        response = self._client.models.generate_content(
+        response = client.models.generate_content(
             model=self._model,
             contents=self._contents,
             config=self._config,
@@ -84,7 +85,7 @@ class GeminiStudentAgent:
                 }
             )
 
-            response = self._client.models.generate_content(
+            response = client.models.generate_content(
                 model=self._model,
                 contents=self._contents,
                 config=self._config,
