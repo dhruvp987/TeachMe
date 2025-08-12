@@ -2,6 +2,7 @@ from typing import Annotated
 from fastapi import FastAPI, File, Header, HTTPException
 from pydantic import BaseModel
 from chroma import Chroma
+from geministudentagent import GeminiStudentAgent
 from inmemoryloginstore import InMemoryLoginStore
 from inmemorysessionmanager import InMemorySessionManager
 
@@ -9,6 +10,10 @@ from inmemorysessionmanager import InMemorySessionManager
 class LoginInfo(BaseModel):
     email: str
     password: str
+
+
+class ChatBody(BaseModel):
+    prompt: str
 
 
 def auth_session_or_fail(ses_token, ses_mngr):
@@ -63,3 +68,17 @@ async def upload_note(
             status_code=400, detail="Note is not a decodable text file."
         )
     return notes_vec_db.add(user_id, [note_str])
+
+
+@app.post("/chat")
+async def chat(
+    chat_body: ChatBody, authorization: Annotated[str | None, Header()] = None
+):
+    user_id = auth_session_or_fail(authorization, ses_manager)
+    student_agent = GeminiStudentAgent("You are a helpful assistant.")
+    return student_agent.generate(
+        chat_body.prompt,
+        lambda query_texts, n_results: notes_vec_db.query(
+            user_id, query_texts, n_results
+        ),
+    )
