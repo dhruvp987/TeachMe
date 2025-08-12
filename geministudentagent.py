@@ -47,8 +47,6 @@ class GeminiStudentAgent:
         self._contents = []
 
     def generate(self, prompt, query_notes_func):
-        output = []
-
         self._contents.append(
             types.Content(role="user", parts=[types.Part(text=prompt)])
         )
@@ -73,45 +71,10 @@ class GeminiStudentAgent:
                 types.Content(role="user", parts=[function_response_part])
             )
 
-            assistant_out = {
-                "role": "assistant",
-                "toolCall": {
-                    "name": QUERY_USER_NOTES_COL_NAME,
-                    "args": func_call.args,
-                },
-            }
-            self._add_possible_thought(
-                response.candidates[0].content.parts, assistant_out
-            )
-
-            output.append(assistant_out)
-            output.append(
-                {
-                    "role": "user",
-                    "toolCallResult": {
-                        "name": QUERY_USER_NOTES_COL_NAME,
-                        "result": notes,
-                    },
-                }
-            )
-
             response = client.models.generate_content(
                 model=self._model,
                 contents=self._contents,
                 config=self._config,
             )
 
-        assistant_out = {
-            "role": "assistant",
-            "content": response.text,
-        }
-        self._add_possible_thought(response.candidates[0].content.parts, assistant_out)
-        output.append(assistant_out)
-
-        return output
-
-    def _add_possible_thought(self, parts, out):
-        for part in parts:
-            if part.thought:
-                return part.text
-        return None
+        return response.text

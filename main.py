@@ -76,9 +76,10 @@ async def chat(
 ):
     user_id = auth_session_or_fail(authorization, ses_manager)
     student_agent = GeminiStudentAgent("You are a helpful assistant.")
-    return student_agent.generate(
+    response = student_agent.generate(
         chat_body.prompt,
         lambda query_texts, n_results: notes_vec_db.query(
             user_id, query_texts, n_results
         ),
     )
+    return {"response": response}
