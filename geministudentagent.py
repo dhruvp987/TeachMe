@@ -34,6 +34,7 @@ client = genai.Client()
 
 class GeminiStudentAgent:
     GEMINI_2_5_FLASH = "gemini-2.5-flash"
+    GEMINI_2_5_PRO = "gemini-2.5-pro"
 
     def __init__(self, system_inst, model=GEMINI_2_5_FLASH):
         self._model = model
@@ -77,6 +78,6 @@ class GeminiStudentAgent:
                 config=self._config,
             )
 
-            self._contents.append(response.candidates[0].content)
+        self._contents.append(response.candidates[0].content)
 
         return response.text
