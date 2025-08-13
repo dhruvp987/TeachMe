@@ -77,4 +77,6 @@ class GeminiStudentAgent:
                 config=self._config,
             )
 
+            self._contents.append(response.candidates[0].content)
+
         return response.text
