@@ -41,6 +41,7 @@ ses_manager = InMemorySessionManager()
 chat_storage = InMemoryChatStorage()
 CHAT_CONVERSATION_KEY = "conversation"
 CHAT_STUDENT_AGENT_KEY = "student_agent"
+CHAT_STUDENT_AGENT_STATE_KEY = "student_agent_state"
 
 chat_cache = ChatCache()
 
@@ -86,7 +87,6 @@ async def upload_note(
     return {"noteId": notes_vec_db.add(user_id, [note_str])}
 
 
-# TODO: Add support for saving student agents' internal state
 @app.post("/chat/new-chat")
 async def new_chat(authorization: Annotated[str | None, Header()] = None):
     user_id = auth_session_or_fail(authorization, ses_manager)
@@ -101,7 +101,6 @@ async def get_chats(authorization: Annotated[str | None, Header()] = None):
     return {"chatIds": chat_storage.get_chats_for_user(user_id)}
 
 
-# TODO: Add support for saving student agents' internal state
 @app.post("/chat/student-response")
 async def chat(
     chat_info: ChatInitInfo, authorization: Annotated[str | None, Header()] = None
@@ -113,9 +112,13 @@ async def chat(
 
     student_agent = chat_cache.get(chat_id, CHAT_STUDENT_AGENT_KEY)
     if student_agent is None:
-        student_agent = GeminiStudentAgent(
-            "You are a very smart and knowledgable person who can tackle any question without much help."
-        )
+        student_agent_state = chat_storage.get(chat_id, CHAT_STUDENT_AGENT_STATE_KEY)
+        if student_agent_state is None:
+            student_agent = GeminiStudentAgent(
+                "You are a very smart and knowledgable person who can tackle any question without much help."
+            )
+        else:
+            student_agent = GeminiStudentAgent.load(student_agent_state)
         chat_cache.store(chat_id, CHAT_STUDENT_AGENT_KEY, student_agent)
 
     response = student_agent.generate(
@@ -129,6 +132,8 @@ async def chat(
     prev_conv.append({"role": "user", "content": chat_info.prompt})
     prev_conv.append({"role": "assistant", "content": response})
     chat_storage.store(chat_id, CHAT_CONVERSATION_KEY, prev_conv)
+
+    chat_storage.store(chat_id, CHAT_STUDENT_AGENT_STATE_KEY, student_agent.save())
 
     return {"response": response}
 

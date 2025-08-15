@@ -1,3 +1,4 @@
+import json
 from google import genai
 from google.genai import types
 
@@ -36,8 +37,24 @@ class GeminiStudentAgent:
     GEMINI_2_5_FLASH = "gemini-2.5-flash"
     GEMINI_2_5_PRO = "gemini-2.5-pro"
 
+    _STATE_MODEL_KEY = "model"
+    _STATE_SYSTEM_INST_KEY = "system_inst"
+    _STATE_CONTENTS_KEY = "contents"
+
+    @staticmethod
+    def load(state):
+        state_dict = json.loads(state)
+        agent = GeminiStudentAgent(
+            state_dict[GeminiStudentAgent._STATE_SYSTEM_INST_KEY],
+            state_dict[GeminiStudentAgent._STATE_MODEL_KEY],
+        )
+        for ctnt_json in state_dict[GeminiStudentAgent._STATE_CONTENTS_KEY]:
+            agent._contents.append(types.Content.parse_raw(ctnt_json))
+        return agent
+
     def __init__(self, system_inst, model=GEMINI_2_5_FLASH):
         self._model = model
+        self._system_inst = system_inst
 
         self._config = types.GenerateContentConfig(
             system_instruction=system_inst,
@@ -81,3 +98,15 @@ class GeminiStudentAgent:
         self._contents.append(response.candidates[0].content)
 
         return response.text
+
+    def save(self):
+        contents_json = []
+        for ctnt in self._contents:
+            contents_json.append(ctnt.json())
+        return json.dumps(
+            {
+                self._STATE_MODEL_KEY: self._model,
+                self._STATE_SYSTEM_INST_KEY: self._system_inst,
+                self._STATE_CONTENTS_KEY: contents_json,
+            }
+        )

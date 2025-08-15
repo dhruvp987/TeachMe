@@ -25,6 +25,8 @@ class InMemoryChatStorage:
 
     def get(self, chat_id, key):
         store = self._chat_store[chat_id]
+        if key not in store:
+            return None
         return store[key]
 
     def belongs_to_user(self, chat_id, user_id):
