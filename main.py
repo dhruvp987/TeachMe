@@ -76,7 +76,7 @@ async def upload_note(
         raise HTTPException(
             status_code=400, detail="Note is not a decodable text file."
         )
-    return notes_vec_db.add(user_id, [note_str])
+    return {"noteId": notes_vec_db.add(user_id, [note_str])}
 
 
 # TODO: Add support for saving student agents' internal state
@@ -91,7 +91,7 @@ async def new_chat(authorization: Annotated[str | None, Header()] = None):
 @app.get("/chat/chats")
 async def get_chats(authorization: Annotated[str | None, Header()] = None):
     user_id = auth_session_or_fail(authorization, ses_manager)
-    return {"chat_ids": chat_storage.get_chats_for_user(user_id)}
+    return {"chatIds": chat_storage.get_chats_for_user(user_id)}
 
 
 # TODO: Add support for saving student agents' internal state
