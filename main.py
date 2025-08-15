@@ -28,6 +28,13 @@ def auth_session_or_fail(ses_token, ses_mngr):
     return id_or_none
 
 
+def fail_if_not_owner_of_chat(chat_id, user_id, chat_storage):
+    if not chat_storage.belongs_to_user(chat_id, user_id):
+        raise HTTPException(
+            status_code=400, detail="Chat ID does not belong to this user ID."
+        )
+
+
 login_store = InMemoryLoginStore()
 ses_manager = InMemorySessionManager()
 
@@ -102,15 +109,12 @@ async def chat(
     user_id = auth_session_or_fail(authorization, ses_manager)
     chat_id = chat_info.chatId
 
-    if not chat_storage.belongs_to_user(chat_id, user_id):
-        return HTTPException(
-            status_code=400, detail="Chat ID does not belong to this user ID."
-        )
+    fail_if_not_owner_of_chat(chat_id, user_id, chat_storage)
 
     student_agent = chat_cache.get(chat_id, CHAT_STUDENT_AGENT_KEY)
     if student_agent is None:
         student_agent = GeminiStudentAgent(
-            "You are a very smart assistant who can tackle any question without much help."
+            "You are a very smart and knowledgable person who can tackle any question without much help."
         )
         chat_cache.store(chat_id, CHAT_STUDENT_AGENT_KEY, student_agent)
 
@@ -127,3 +131,12 @@ async def chat(
     chat_storage.store(chat_id, CHAT_CONVERSATION_KEY, prev_conv)
 
     return {"response": response}
+
+
+@app.get("/chat/conversation/{chat_id}")
+async def get_conversation(
+    chat_id: str, authorization: Annotated[str | None, Header()] = None
+):
+    user_id = auth_session_or_fail(authorization, ses_manager)
+    fail_if_not_owner_of_chat(chat_id, user_id, chat_storage)
+    return {"conversation": chat_storage.get(chat_id, CHAT_CONVERSATION_KEY)}
