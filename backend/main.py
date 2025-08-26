@@ -1,5 +1,6 @@
 from typing import Annotated
 from fastapi import FastAPI, File, Header, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from chroma import Chroma
 from geministudentagent import GeminiStudentAgent
@@ -48,6 +49,19 @@ chat_cache = ChatCache()
 notes_vec_db = Chroma()
 
 app = FastAPI()
+
+origins = [
+    # Next.js origin when using "npm run dev"
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.post("/auth/new-account")
