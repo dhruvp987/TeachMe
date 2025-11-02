@@ -1,9 +1,9 @@
-'use client'
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import * as api from '../src/api';
-import * as pages from '../src/pages';
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import * as api from "../src/api";
+import * as pages from "../src/pages";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -14,12 +14,12 @@ export default function SignUpPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const email = formData.get('email') as string;
-      const password = formData.get('password') as string;
+      const email = formData.get("email") as string;
+      const password = formData.get("password") as string;
       await api.newAccount(email, password);
       router.push(pages.homeRoute());
     } catch (err: any) {
-      setError(err.message || 'Sign up failed');
+      setError(err.message || "Sign up failed");
     } finally {
       setIsLoading(false);
     }
@@ -29,10 +29,15 @@ export default function SignUpPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
         <div>
-          <h2 className="text-center text-3xl font-bold text-gray-900">Sign Up</h2>
+          <h2 className="text-center text-3xl font-bold text-gray-900">
+            Sign Up
+          </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Already have an account?{' '}
-            <a href={pages.loginRoute()} className="font-medium text-blue-600 hover:text-blue-500">
+            Already have an account?{" "}
+            <a
+              href={pages.loginRoute()}
+              className="font-medium text-blue-600 hover:text-blue-500"
+            >
               Sign in
             </a>
           </p>
@@ -45,7 +50,10 @@ export default function SignUpPage() {
           )}
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email address
               </label>
               <input
@@ -58,7 +66,10 @@ export default function SignUpPage() {
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <input
@@ -77,7 +88,7 @@ export default function SignUpPage() {
               disabled={isLoading}
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Signing up...' : 'Create Account'}
+              {isLoading ? "Signing up..." : "Create Account"}
             </button>
           </div>
         </form>
