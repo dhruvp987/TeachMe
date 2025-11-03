@@ -82,7 +82,7 @@ async def new_session(info: LoginInfo):
 
 @app.post("/auth/session-expire")
 async def session_expire(authorization: Annotated[str | None, Header()] = None):
-    authenticate_session(authorization, ses_manager)
+    auth_session_or_fail(authorization, ses_manager)
     ses_manager.expire_session(authorization)
 
 
