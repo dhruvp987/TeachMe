@@ -13,6 +13,7 @@ interface ConversationViewProps {
   error: string | null;
   onPromptChange: (value: string) => void;
   onSendPrompt: (e: React.FormEvent) => void;
+  onNewChat?: () => void;
 }
 
 export default function ConversationView({
@@ -23,13 +24,14 @@ export default function ConversationView({
   error,
   onPromptChange,
   onSendPrompt,
+  onNewChat,
 }: ConversationViewProps) {
   return (
     <div
       className="bg-white rounded-lg shadow flex flex-col"
       style={{ height: "calc(100vh - 200px)" }}
     >
-      {currentChatId && (
+      {currentChatId ? (
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {conversation.length === 0 && (
             <div className="text-center text-gray-500 mt-8">
@@ -66,6 +68,26 @@ export default function ConversationView({
               </div>
             </div>
           )}
+        </div>
+      ) : (
+        <div className="flex-1 p-6 flex items-center justify-center">
+          <div className="text-center text-gray-500">
+            <p className="text-lg">
+              Teach an AI student and learn!
+            </p>
+            <p className="text-sm mt-2">
+              Start a new session or go back to a previous one using the sidebar.
+            </p>
+            <div className="mt-6">
+              <button
+                type="button"
+                onClick={onNewChat}
+                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              >
+                New Chat
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

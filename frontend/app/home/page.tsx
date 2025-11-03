@@ -199,6 +199,7 @@ export default function HomePage() {
                 error={error}
                 onPromptChange={setPrompt}
                 onSendPrompt={handleSendPrompt}
+                onNewChat={handleNewChat}
               />
             </div>
           </div>
