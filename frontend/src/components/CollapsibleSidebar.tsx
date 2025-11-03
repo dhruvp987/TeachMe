@@ -17,18 +17,18 @@ export default function CollapsibleSidebar({
     <>
       {/* Sidebar Overlay */}
       {isOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:bg-opacity-30"
-          onClick={onClose}
-        />
+        <div className="fixed inset-0 bg-black/50 z-30" onClick={onClose} />
       )}
 
       {/* Left Sidebar - Chat History */}
       <div
         className={`fixed top-0 left-0 h-full w-80 bg-white shadow-lg z-40 transform transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } pt-16`}
+        } pt-5`}
       >
+        <div className="pl-4 lg:pl-8">
+          <SidebarToggleButton isOpen={isOpen} onToggle={onClose} />
+        </div>
         <div className="h-full overflow-y-auto p-4 lg:p-6">{children}</div>
       </div>
     </>

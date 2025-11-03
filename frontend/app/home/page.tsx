@@ -178,11 +178,7 @@ export default function HomePage() {
       </CollapsibleSidebar>
 
       {/* Main Content */}
-      <div
-        className={`flex-1 w-full px-4 sm:px-6 lg:px-8 py-8 transition-all duration-300 ${
-          isSidebarOpen ? "lg:ml-80" : ""
-        }`}
-      >
+      <div className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Middle Sidebar - Notes Upload */}
